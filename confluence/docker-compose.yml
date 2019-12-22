@@ -1,0 +1,49 @@
+version: '2'
+services:
+  gitlab:
+    container_name: gitlab
+    image: gitlab/gitlab-ce
+    restart: always
+    hostname: 'gitlab.dlxlife.com'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.dlxlife.com'
+    ports:
+      - "8000:22"
+      - "8001:80"
+      - "8002:443"
+    volumes:
+      - /data/gitlab/config:/etc/gitlab
+      - /data/gitlab/logs:/var/log/gitlab
+      - /data/gitlab/data:/var/opt/gitlab     
+  mariadb:
+    container_name: mariadb
+    hostname: mariadb
+    image: mariadb:latest
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=confluence
+      - MYSQL_DATABASE=confluence
+      - MYSQL_USER=confluence
+      - MYSQL_PASSWORD=confluence
+      - character-set-server=utf8
+      - collation-server=utf8_bin
+    ports:
+      - 3306:3306
+    tmpfs:
+      - /var/run
+    volumes:
+      - /data/mysql/data:/var/lib/mysql
+      - /data/mysql/conf:/etc/mysql/conf.d
+  cf:
+    container_name: confluence
+    image: deluxe123/confluence-server:7.0.3
+    # image: atlassian/confluence-server:7.0.3
+    restart: always
+    ports:
+      - 8091:8091
+      - 8090:8090
+    volumes:
+      - /data/confluence:/var/atlassian/application-data/confluence
+    links:
+      - mariadb

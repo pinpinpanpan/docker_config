@@ -1,0 +1,45 @@
+version: '2'
+services:
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
+  db:
+    container_name: mariadb
+    image: mariadb:latest
+    restart: always
+    env_file: secret.env
+    ports:
+      - 3306:3306
+    tmpfs:
+      - /var/run
+    volumes:
+      - /data/deluxe/docker/mysql:/var/lib/mysql
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+  mq:
+    container_name: mq
+    image: rabbitmq:latest
+    restart: always
+    env_file: secret.env
+    ports:
+      - 5672:5672
+      - 15672:15672
+  ufolaunch:
+    container_name: ufolaunch
+    image: ufolaunch:0.0.1
+    restart: always
+    network_mode: "host"
+    env_file: secret.env
+    environment:
+      - MYSQL_DATABASE=actor
+    depends_on:
+      - db
+      - redis
+      - mq
